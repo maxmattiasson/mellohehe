@@ -1,3 +1,8 @@
+const categories = ["Slay", "Utseende", "Låt", "Sångröst"];
+
+test();
+renderBidrag();
+
 function test() {
   for (let i = 1; i < 6; i++) {
     const div = document.createElement("div");
@@ -18,8 +23,8 @@ function renderBidrag() {
   document.querySelectorAll(".bidrag-cont").forEach((cont) => {
     const form = document.createElement("form");
 
-    for (let i = 0; i < 4; i++) {
-      const slider = makeSlider(i);
+    for (const cat of categories) {
+      const slider = makeSlider(cat);
       form.append(slider);
     }
     const submitButton = document.createElement("button");
@@ -30,14 +35,30 @@ function renderBidrag() {
     form.append(submitButton);
   });
 }
-function makeSlider(i) {
+function makeSlider(cat) {
+  const label = document.createElement("label");
+  label.textContent = cat;
+  label.htmlFor = cat;
+
   const slider = document.createElement("input");
   slider.type = "range";
   slider.min = "1";
   slider.max = "5";
   slider.value = "3";
-  return slider;
+  slider.classList.add("slider");
+  slider.id = cat;
+
+  const p = document.createElement("p");
+  p.classList.add("value-box");
+
+  label.append(slider, p);
+  return label;
 }
 
-test();
-renderBidrag();
+// function loadListener() {}
+// function renderSliderValue(e) {
+//   const cont = document.querySelectorAll(".slider");
+//   if (!cont) return;
+
+//   if (e.target.closest === cont &&)
+// }
