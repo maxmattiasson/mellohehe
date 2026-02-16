@@ -4,14 +4,17 @@
   padding: 0px;
 }
 body {
-  background: radial-gradient(
-    circle at right,
+  background: linear-gradient(
+    to right,
     yellow,
     rgba(255, 0, 242, 0.7),
     rgba(0, 255, 225, 0.9),
     rgba(255, 0, 242, 0.7),
     yellow
   );
+  background-repeat: no-repeat;
+  background-size: cover;
+  background-attachment: fixed;
   padding: 0px 12px;
 }
 h1 {
