@@ -7,6 +7,7 @@ function test() {
 
     div.classList.add("bidrag-cont");
     div.id = `bidrag-${i}`;
+    div.dataset.bidrag = i;
 
     div.append(h2);
     document.querySelector(".cont").append(div);
@@ -14,16 +15,22 @@ function test() {
 }
 
 function renderBidrag() {
-  const frag = document.createDocumentFragment();
-
   document.querySelectorAll(".bidrag-cont").forEach((cont) => {
-    for (let i = 0; i <= 4; i++) {
-      const slider = makeSlider();
-      cont.append(slider);
+    const form = document.createElement("form");
+
+    for (let i = 0; i < 4; i++) {
+      const slider = makeSlider(i);
+      form.append(slider);
     }
+    const submitButton = document.createElement("button");
+    submitButton.type = "submit";
+    submitButton.textContent = "Spara";
+
+    cont.append(form);
+    form.append(submitButton);
   });
 }
-function makeSlider() {
+function makeSlider(i) {
   const slider = document.createElement("input");
   slider.type = "range";
   slider.min = "1";
