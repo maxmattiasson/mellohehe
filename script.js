@@ -60,6 +60,15 @@ function makeSlider(cat, bidragId, sliderIndex) {
   return label;
 }
 
+document.querySelector(".cont").addEventListener("input", (e) => {
+  if (!e.target.classList.contains("slider")) return;
+
+  const slider = e.target;
+  const valueBox = slider.nextElementSibling;
+
+  valueBox.textContent = slider.value;
+});
+
 // function loadListener() {}
 // function renderSliderValue(e) {
 //   const cont = document.querySelectorAll(".slider");
