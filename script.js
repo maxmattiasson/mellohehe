@@ -1,5 +1,12 @@
 const categories = ["Slay", "Utseende", "Låt", "Sångröst"];
+document.querySelector(".cont").addEventListener("input", (e) => {
+  if (!e.target.classList.contains("slider")) return;
 
+  const slider = e.target;
+  const valueBox = slider.nextElementSibling;
+
+  valueBox.textContent = slider.value;
+});
 test();
 renderBidrag();
 
@@ -22,12 +29,14 @@ function test() {
 function renderBidrag() {
   document.querySelectorAll(".bidrag-cont").forEach((cont) => {
     const form = document.createElement("form");
+    const sliderContainer = document.createElement("div");
+    sliderContainer.classList.add("slider-cont");
 
     const bidragId = cont.dataset.bidrag;
 
     for (let i = 0; i < categories.length; i++) {
       const slider = makeSlider(categories[i], bidragId, i);
-      form.append(slider);
+      sliderContainer.append(slider);
     }
 
     const submitButton = document.createElement("button");
@@ -35,7 +44,7 @@ function renderBidrag() {
     submitButton.textContent = "Spara";
 
     cont.append(form);
-    form.append(submitButton);
+    form.append(sliderContainer, submitButton);
   });
 }
 function makeSlider(cat, bidragId, sliderIndex) {
@@ -59,15 +68,6 @@ function makeSlider(cat, bidragId, sliderIndex) {
   label.append(slider, p);
   return label;
 }
-
-document.querySelector(".cont").addEventListener("input", (e) => {
-  if (!e.target.classList.contains("slider")) return;
-
-  const slider = e.target;
-  const valueBox = slider.nextElementSibling;
-
-  valueBox.textContent = slider.value;
-});
 
 // function loadListener() {}
 // function renderSliderValue(e) {

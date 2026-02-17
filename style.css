@@ -34,8 +34,12 @@ h1 {
   align-items: flex-start;
   gap: 10px;
 }
+
+.slider-cont input {
+  margin-left: auto;
+}
 label {
   display: flex;
-  width: 300px;
+  width: 100%;
   gap: 10px;
 }
