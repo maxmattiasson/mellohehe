@@ -23,10 +23,13 @@ function renderBidrag() {
   document.querySelectorAll(".bidrag-cont").forEach((cont) => {
     const form = document.createElement("form");
 
-    for (const cat of categories) {
-      const slider = makeSlider(cat);
+    const bidragId = cont.dataset.bidrag;
+
+    for (let i = 0; i < categories.length; i++) {
+      const slider = makeSlider(categories[i], bidragId, i);
       form.append(slider);
     }
+
     const submitButton = document.createElement("button");
     submitButton.type = "submit";
     submitButton.textContent = "Spara";
@@ -35,10 +38,12 @@ function renderBidrag() {
     form.append(submitButton);
   });
 }
-function makeSlider(cat) {
+function makeSlider(cat, bidragId, sliderIndex) {
+  const id = `b${bidragId}-c${sliderIndex}`;
+
   const label = document.createElement("label");
   label.textContent = cat;
-  label.htmlFor = cat;
+  label.htmlFor = id;
 
   const slider = document.createElement("input");
   slider.type = "range";
@@ -46,7 +51,7 @@ function makeSlider(cat) {
   slider.max = "5";
   slider.value = "3";
   slider.classList.add("slider");
-  slider.id = cat;
+  slider.id = id;
 
   const p = document.createElement("p");
   p.classList.add("value-box");
