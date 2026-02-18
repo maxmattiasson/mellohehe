@@ -1,78 +1,239 @@
-const categories = ["Slay", "Utseende", "Låt", "Sångröst"];
-document.querySelector(".cont").addEventListener("input", (e) => {
-  if (!e.target.classList.contains("slider")) return;
+const App = (() => {
+  const CATEGORIES = ["Slay", "Utseende", "Låt", "Sångröst"];
+  const BIDRAG_COUNT = 6;
+  const DEFAULT_SCORE = 3;
+  const STORAGE_KEYS = {
+    username: "mello:username",
+    scores: "mello:scores",
+  };
 
-  const slider = e.target;
-  const valueBox = slider.nextElementSibling;
+  const elements = {
+    usernameInput: document.querySelector("#username"),
+    bidragList: document.querySelector("#bidrag-list"),
+    rankingList: document.querySelector("#ranking-list"),
+  };
 
-  valueBox.textContent = slider.value;
-});
-test();
-renderBidrag();
+  const state = {
+    username: "",
+    scores: {},
+  };
 
-function test() {
-  for (let i = 1; i < 6; i++) {
-    const div = document.createElement("div");
-
-    const h2 = document.createElement("h2");
-    h2.textContent = "Bidrag " + i;
-
-    div.classList.add("bidrag-cont");
-    div.id = `bidrag-${i}`;
-    div.dataset.bidrag = i;
-
-    div.append(h2);
-    document.querySelector(".cont").append(div);
+  function init() {
+    hydrateState();
+    render();
+    attachEvents();
   }
-}
 
-function renderBidrag() {
-  document.querySelectorAll(".bidrag-cont").forEach((cont) => {
-    const form = document.createElement("form");
-    const sliderContainer = document.createElement("div");
-    sliderContainer.classList.add("slider-cont");
+  function hydrateState() {
+    state.username = loadUsername();
+    state.scores = buildScoreState(loadScores());
+  }
 
-    const bidragId = cont.dataset.bidrag;
+  function buildScoreState(storedScores) {
+    const nextScores = {};
 
-    for (let i = 0; i < categories.length; i++) {
-      const slider = makeSlider(categories[i], bidragId, i);
-      sliderContainer.append(slider);
+    for (let bidragIndex = 1; bidragIndex <= BIDRAG_COUNT; bidragIndex += 1) {
+      const bidragId = makeBidragId(bidragIndex);
+      nextScores[bidragId] = {};
+
+      CATEGORIES.forEach((category) => {
+        const rawValue = storedScores?.[bidragId]?.[category];
+        const parsedValue = Number(rawValue);
+        nextScores[bidragId][category] = Number.isFinite(parsedValue)
+          ? parsedValue
+          : DEFAULT_SCORE;
+      });
     }
 
-    const submitButton = document.createElement("button");
-    submitButton.type = "submit";
-    submitButton.textContent = "Spara";
+    return nextScores;
+  }
 
-    cont.append(form);
-    form.append(sliderContainer, submitButton);
-  });
-}
-function makeSlider(cat, bidragId, sliderIndex) {
-  const id = `b${bidragId}-c${sliderIndex}`;
+  function render() {
+    renderUsername();
+    renderBidragCards();
+    renderRanking();
+  }
 
-  const label = document.createElement("label");
-  label.textContent = cat;
-  label.htmlFor = id;
+  function renderUsername() {
+    elements.usernameInput.value = state.username;
+  }
 
-  const slider = document.createElement("input");
-  slider.type = "range";
-  slider.min = "1";
-  slider.max = "5";
-  slider.value = "3";
-  slider.classList.add("slider");
-  slider.id = id;
+  function renderBidragCards() {
+    elements.bidragList.innerHTML = "";
 
-  const p = document.createElement("p");
-  p.classList.add("value-box");
+    for (let bidragIndex = 1; bidragIndex <= BIDRAG_COUNT; bidragIndex += 1) {
+      const bidragId = makeBidragId(bidragIndex);
+      const card = createBidragCard(bidragIndex, bidragId);
+      elements.bidragList.append(card);
+    }
+  }
 
-  label.append(slider, p);
-  return label;
-}
+  function createBidragCard(bidragIndex, bidragId) {
+    const card = document.createElement("article");
+    card.className = "bidrag-cont";
+    card.dataset.bidrag = bidragId;
 
-// function loadListener() {}
-// function renderSliderValue(e) {
-//   const cont = document.querySelectorAll(".slider");
-//   if (!cont) return;
+    const heading = document.createElement("h2");
+    heading.textContent = `Bidrag ${bidragIndex}`;
+    card.append(heading);
 
-//   if (e.target.closest === cont &&)
-// }
+    const sliderContainer = document.createElement("div");
+    sliderContainer.className = "slider-cont";
+
+    CATEGORIES.forEach((category, categoryIndex) => {
+      sliderContainer.append(
+        createSliderRow(bidragId, category, categoryIndex),
+      );
+    });
+
+    card.append(sliderContainer, createTotalRow(bidragId));
+    return card;
+  }
+
+  function createSliderRow(bidragId, category, categoryIndex) {
+    const sliderId = `${bidragId}-c${categoryIndex}`;
+    const value = state.scores[bidragId][category];
+
+    const label = document.createElement("label");
+    label.className = "slider-row";
+    label.htmlFor = sliderId;
+
+    const text = document.createElement("span");
+    text.className = "slider-label";
+    text.textContent = category;
+
+    const slider = document.createElement("input");
+    slider.type = "range";
+    slider.min = "1";
+    slider.max = "5";
+    slider.value = String(value);
+    slider.className = "slider";
+    slider.id = sliderId;
+    slider.dataset.bidrag = bidragId;
+    slider.dataset.category = category;
+
+    const valueBox = document.createElement("output");
+    valueBox.className = "value-box";
+    valueBox.textContent = String(value);
+    valueBox.setAttribute("for", sliderId);
+
+    label.append(text, slider, valueBox);
+    return label;
+  }
+
+  function createTotalRow(bidragId) {
+    const totalRow = document.createElement("label");
+    totalRow.className = "total-row";
+
+    const totalLabel = document.createElement("span");
+    totalLabel.textContent = "Total";
+
+    const totalInput = document.createElement("input");
+    totalInput.type = "number";
+    totalInput.readOnly = true;
+    totalInput.className = "total-input";
+    totalInput.dataset.bidrag = bidragId;
+    totalInput.value = String(getBidragTotal(bidragId));
+
+    totalRow.append(totalLabel, totalInput);
+    return totalRow;
+  }
+
+  function attachEvents() {
+    elements.usernameInput.addEventListener("input", handleUsernameInput);
+    elements.bidragList.addEventListener("input", handleSliderInput);
+  }
+
+  function handleUsernameInput(event) {
+    state.username = event.target.value.trimStart();
+    saveUsername(state.username);
+  }
+
+  function handleSliderInput(event) {
+    if (!event.target.classList.contains("slider")) return;
+
+    const slider = event.target;
+    const bidragId = slider.dataset.bidrag;
+    const category = slider.dataset.category;
+    const value = Number(slider.value);
+
+    state.scores[bidragId][category] = value;
+    slider.nextElementSibling.textContent = String(value);
+    updateBidragTotalInput(bidragId);
+    renderRanking();
+    saveScores(state.scores);
+  }
+
+  function updateBidragTotalInput(bidragId) {
+    const input = elements.bidragList.querySelector(
+      `.total-input[data-bidrag="${bidragId}"]`,
+    );
+    if (!input) return;
+    input.value = String(getBidragTotal(bidragId));
+  }
+
+  function getBidragTotal(bidragId) {
+    return CATEGORIES.reduce((sum, category) => {
+      return sum + Number(state.scores[bidragId][category]);
+    }, 0);
+  }
+
+  function renderRanking() {
+    elements.rankingList.innerHTML = "";
+
+    const rankedBidrag = getRankedBidrag();
+    rankedBidrag.forEach(({ bidragId, total }) => {
+      const li = document.createElement("li");
+      li.textContent = `${formatBidragName(bidragId)} (${total} poäng)`;
+      elements.rankingList.append(li);
+    });
+  }
+
+  function getRankedBidrag() {
+    const entries = [];
+
+    for (let bidragIndex = 1; bidragIndex <= BIDRAG_COUNT; bidragIndex += 1) {
+      const bidragId = makeBidragId(bidragIndex);
+      entries.push({
+        bidragId,
+        total: getBidragTotal(bidragId),
+        index: bidragIndex,
+      });
+    }
+
+    return entries.sort((a, b) => b.total - a.total || a.index - b.index);
+  }
+
+  function formatBidragName(bidragId) {
+    return `Bidrag ${bidragId.replace("bidrag-", "")}`;
+  }
+
+  function loadUsername() {
+    return localStorage.getItem(STORAGE_KEYS.username) || "";
+  }
+
+  function saveUsername(username) {
+    localStorage.setItem(STORAGE_KEYS.username, username);
+  }
+
+  function loadScores() {
+    try {
+      const raw = localStorage.getItem(STORAGE_KEYS.scores);
+      return raw ? JSON.parse(raw) : {};
+    } catch (_error) {
+      return {};
+    }
+  }
+
+  function saveScores(scores) {
+    localStorage.setItem(STORAGE_KEYS.scores, JSON.stringify(scores));
+  }
+
+  function makeBidragId(index) {
+    return `bidrag-${index}`;
+  }
+
+  return { init };
+})();
+
+App.init();
