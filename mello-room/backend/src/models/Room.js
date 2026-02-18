@@ -1,7 +1,6 @@
 class Room {
-  constructor({ code, hostUserId, createdAt = new Date() }) {
+  constructor({ code, createdAt = new Date() }) {
     this.code = code;
-    this.hostUserId = hostUserId;
     this.createdAt = createdAt;
   }
 }

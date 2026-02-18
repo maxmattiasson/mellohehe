@@ -1,60 +1,60 @@
 (() => {
   const BIDRAG_COUNT = 5;
   const CATEGORIES = [
-    { key: 'slay', label: 'Slay' },
-    { key: 'utseende', label: 'Utseende' },
-    { key: 'lat', label: 'Låt' },
-    { key: 'sangrost', label: 'Sångröst' },
+    { key: "slay", label: "Slay" },
+    { key: "utseende", label: "Utseende" },
+    { key: "lat", label: "Låt" },
+    { key: "sangrost", label: "Sångröst" },
   ];
   const SCORE_MIN = 1;
   const SCORE_MAX = 10;
 
   const STORAGE_KEYS = {
-    guestId: 'mello:guestId',
-    identity: 'mello:identity',
-    session: 'mello:session',
+    guestId: "mello:guestId",
+    identity: "mello:identity",
+    session: "mello:session",
   };
 
   const page = document.body.dataset.page;
 
-  if (page === 'home') initHomePage();
-  if (page === 'vote') initVotePage();
-  if (page === 'results') initResultsPage();
+  if (page === "home") initHomePage();
+  if (page === "vote") initVotePage();
+  if (page === "results") initResultsPage();
 
   function initHomePage() {
-    const displayNameInput = document.querySelector('#displayName');
-    const joinCodeInput = document.querySelector('#joinCode');
-    const createBtn = document.querySelector('#createRoomBtn');
-    const joinBtn = document.querySelector('#joinRoomBtn');
-    const statusEl = document.querySelector('#homeStatus');
+    const displayNameInput = document.querySelector("#displayName");
+    const joinCodeInput = document.querySelector("#joinCode");
+    const createBtn = document.querySelector("#createRoomBtn");
+    const joinBtn = document.querySelector("#joinRoomBtn");
+    const statusEl = document.querySelector("#homeStatus");
 
     const identity = loadIdentity();
-    displayNameInput.value = identity.displayName || '';
+    displayNameInput.value = identity.displayName || "";
 
-    displayNameInput.addEventListener('input', () => {
-      const next = { ...loadIdentity(), displayName: displayNameInput.value.trim() };
+    displayNameInput.addEventListener("input", () => {
+      const next = {
+        ...loadIdentity(),
+        displayName: displayNameInput.value.trim(),
+      };
       saveIdentity(next);
     });
 
-    createBtn.addEventListener('click', async () => {
+    createBtn.addEventListener("click", async () => {
       try {
         const current = loadIdentity();
-        const displayName = current.displayName || displayNameInput.value.trim();
+        const displayName =
+          current.displayName || displayNameInput.value.trim();
         const authUserId = current.authUserId;
-        const hostUserId = getHostUserId();
 
-        if (!displayName) throw new Error('Display name is required');
-        if (!hostUserId) {
-          throw new Error('Host user ID missing. Set localStorage key "mello:hostUserId".');
-        }
+        if (!displayName) throw new Error("Display name is required");
 
-        setStatus(statusEl, 'Creating room...');
-        const { code } = await window.api.createRoom(hostUserId);
+        setStatus(statusEl, "Creating room...");
+        const { code } = await window.api.createRoom();
 
         const participantId = toParticipantId(authUserId);
         await window.api.joinRoom(code, participantId, displayName);
 
-        saveIdentity({ displayName, authUserId, hostUserId });
+        saveIdentity({ displayName, authUserId });
         saveSession({ roomCode: code, participantId, displayName });
 
         location.href = `/vote?code=${encodeURIComponent(code)}`;
@@ -63,19 +63,20 @@
       }
     });
 
-    joinBtn.addEventListener('click', async () => {
+    joinBtn.addEventListener("click", async () => {
       try {
         const current = loadIdentity();
-        const displayName = current.displayName || displayNameInput.value.trim();
+        const displayName =
+          current.displayName || displayNameInput.value.trim();
         const authUserId = current.authUserId;
         const code = joinCodeInput.value.trim().toUpperCase();
 
-        if (!displayName) throw new Error('Display name is required');
-        if (!code) throw new Error('Room code is required');
+        if (!displayName) throw new Error("Display name is required");
+        if (!code) throw new Error("Room code is required");
 
         const participantId = toParticipantId(authUserId);
 
-        setStatus(statusEl, 'Joining room...');
+        setStatus(statusEl, "Joining room...");
         await window.api.joinRoom(code, participantId, displayName);
 
         saveIdentity({ ...current, displayName });
@@ -89,15 +90,15 @@
   }
 
   function initVotePage() {
-    const gridEl = document.querySelector('#voteGrid');
-    const saveBtn = document.querySelector('#saveVotesBtn');
-    const statusEl = document.querySelector('#saveStatus');
-    const metaEl = document.querySelector('#voteMeta');
-    const resultsLink = document.querySelector('#resultsLink');
+    const gridEl = document.querySelector("#voteGrid");
+    const saveBtn = document.querySelector("#saveVotesBtn");
+    const statusEl = document.querySelector("#saveStatus");
+    const metaEl = document.querySelector("#voteMeta");
+    const resultsLink = document.querySelector("#resultsLink");
 
     const session = getPageSession();
     if (!session) {
-      setStatus(statusEl, 'Missing room context. Go back to Home.', true);
+      setStatus(statusEl, "Missing room context. Go back to Home.", true);
       saveBtn.disabled = true;
       return;
     }
@@ -127,8 +128,8 @@
         // Keep defaults if no prior submission exists.
       });
 
-    gridEl.addEventListener('input', (event) => {
-      if (!event.target.classList.contains('vote-slider')) return;
+    gridEl.addEventListener("input", (event) => {
+      if (!event.target.classList.contains("vote-slider")) return;
 
       const slider = event.target;
       const bidragId = slider.dataset.bidrag;
@@ -142,7 +143,7 @@
       queueAutosave(state, statusEl);
     });
 
-    saveBtn.addEventListener('click', async () => {
+    saveBtn.addEventListener("click", async () => {
       try {
         await persistVotes(state, statusEl);
       } catch (_error) {
@@ -152,13 +153,14 @@
   }
 
   function initResultsPage() {
-    const listEl = document.querySelector('#resultsList');
-    const metaEl = document.querySelector('#resultsMeta');
-    const backLink = document.querySelector('#backToVote');
+    const listEl = document.querySelector("#resultsList");
+    const metaEl = document.querySelector("#resultsMeta");
+    const backLink = document.querySelector("#backToVote");
 
     const session = getPageSession();
     if (!session) {
-      listEl.innerHTML = '<article class="card"><p class="status error">Missing room context. Go back to Home.</p></article>';
+      listEl.innerHTML =
+        '<article class="card"><p class="status error">Missing room context. Go back to Home.</p></article>';
       return;
     }
 
@@ -180,37 +182,37 @@
   }
 
   function renderVoteGrid(container, votes) {
-    container.innerHTML = '';
+    container.innerHTML = "";
 
     for (let i = 1; i <= BIDRAG_COUNT; i += 1) {
       const bidragId = `bidrag-${i}`;
-      const card = document.createElement('article');
-      card.className = 'card vote-card';
+      const card = document.createElement("article");
+      card.className = "card vote-card";
       card.dataset.bidrag = bidragId;
 
-      const title = document.createElement('h2');
+      const title = document.createElement("h2");
       title.textContent = `Bidrag ${i}`;
       card.append(title);
 
-      const rows = document.createElement('div');
-      rows.className = 'rows';
+      const rows = document.createElement("div");
+      rows.className = "rows";
 
       CATEGORIES.forEach(({ key, label }, index) => {
         const sliderId = `${bidragId}-${index}`;
         const value = Number(votes[bidragId][key]);
 
-        const row = document.createElement('label');
-        row.className = 'slider-row';
+        const row = document.createElement("label");
+        row.className = "slider-row";
         row.htmlFor = sliderId;
 
-        const labelEl = document.createElement('span');
-        labelEl.className = 'slider-label';
+        const labelEl = document.createElement("span");
+        labelEl.className = "slider-label";
         labelEl.textContent = label;
 
-        const slider = document.createElement('input');
-        slider.className = 'vote-slider';
+        const slider = document.createElement("input");
+        slider.className = "vote-slider";
         slider.id = sliderId;
-        slider.type = 'range';
+        slider.type = "range";
         slider.min = String(SCORE_MIN);
         slider.max = String(SCORE_MAX);
         slider.value = String(value);
@@ -218,8 +220,8 @@
         slider.dataset.category = key;
         setSliderProgress(slider, value);
 
-        const valueEl = document.createElement('output');
-        valueEl.className = 'value-chip';
+        const valueEl = document.createElement("output");
+        valueEl.className = "value-chip";
         valueEl.textContent = String(value);
 
         row.append(labelEl, slider, valueEl);
@@ -228,8 +230,8 @@
 
       card.append(rows);
 
-      const total = document.createElement('p');
-      total.className = 'total';
+      const total = document.createElement("p");
+      total.className = "total";
       total.dataset.totalFor = bidragId;
       total.textContent = `Total: ${sumBidrag(votes[bidragId])}`;
       card.append(total);
@@ -239,10 +241,11 @@
   }
 
   function renderTotals(container, bidragResults) {
-    container.innerHTML = '';
+    container.innerHTML = "";
 
     if (!bidragResults.length) {
-      container.innerHTML = '<article class="card"><p class="muted">No submissions yet.</p></article>';
+      container.innerHTML =
+        '<article class="card"><p class="muted">No submissions yet.</p></article>';
       return;
     }
 
@@ -250,14 +253,14 @@
       const bestCategory = getBestCategory(result.averages);
       const categoryHtml = CATEGORIES.map(({ key, label }) => {
         return `<li><strong>${label}:</strong> ${toDisplayNumber(result.averages[key])}</li>`;
-      }).join('');
+      }).join("");
 
-      const medalClass = idx < 3 ? ` rank-${idx + 1}` : '';
+      const medalClass = idx < 3 ? ` rank-${idx + 1}` : "";
 
       container.insertAdjacentHTML(
-        'beforeend',
+        "beforeend",
         `<article class="card result-card${medalClass}">
-          <h2>${escapeHtml(result.bidragId.replace('bidrag-', 'Bidrag '))}</h2>
+          <h2>${escapeHtml(result.bidragId.replace("bidrag-", "Bidrag "))}</h2>
           <p><strong>Total Avg:</strong> ${toDisplayNumber(result.totalAvg)}</p>
           <p><strong>Votes Count:</strong> ${result.votesCount}</p>
           <p class="muted">Top category: ${escapeHtml(bestCategory.label)} (${toDisplayNumber(bestCategory.value)})</p>
@@ -268,13 +271,13 @@
   }
 
   function updateSliderRow(slider, value) {
-    const row = slider.closest('.slider-row');
-    const chip = row?.querySelector('.value-chip');
+    const row = slider.closest(".slider-row");
+    const chip = row?.querySelector(".value-chip");
     if (chip) {
       chip.textContent = String(value);
-      chip.classList.remove('pulse');
+      chip.classList.remove("pulse");
       void chip.offsetWidth;
-      chip.classList.add('pulse');
+      chip.classList.add("pulse");
     }
 
     setSliderProgress(slider, value);
@@ -282,7 +285,7 @@
 
   function setSliderProgress(slider, value) {
     const percent = ((value - SCORE_MIN) / (SCORE_MAX - SCORE_MIN)) * 100;
-    slider.style.setProperty('--progress', `${percent}%`);
+    slider.style.setProperty("--progress", `${percent}%`);
   }
 
   function updateBidragTotal(container, bidragId, bidragVotes) {
@@ -292,7 +295,7 @@
   }
 
   function queueAutosave(state, statusEl) {
-    setStatus(statusEl, 'Saving...');
+    setStatus(statusEl, "Saving...");
     clearTimeout(state.saveTimer);
     state.saveTimer = setTimeout(() => {
       persistVotes(state, statusEl).catch(() => {});
@@ -341,7 +344,11 @@
 
       CATEGORIES.forEach(({ key }) => {
         const value = Number(votes[bidragId]?.[key]);
-        if (Number.isInteger(value) && value >= SCORE_MIN && value <= SCORE_MAX) {
+        if (
+          Number.isInteger(value) &&
+          value >= SCORE_MIN &&
+          value <= SCORE_MAX
+        ) {
           merged[bidragId][key] = value;
         }
       });
@@ -351,11 +358,18 @@
   }
 
   function sumBidrag(bidragVotes) {
-    return CATEGORIES.reduce((sum, { key }) => sum + Number(bidragVotes[key]), 0);
+    return CATEGORIES.reduce(
+      (sum, { key }) => sum + Number(bidragVotes[key]),
+      0,
+    );
   }
 
   function getBestCategory(averages) {
-    let best = { key: CATEGORIES[0].key, label: CATEGORIES[0].label, value: -1 };
+    let best = {
+      key: CATEGORIES[0].key,
+      label: CATEGORIES[0].label,
+      value: -1,
+    };
 
     CATEGORIES.forEach((category) => {
       const value = Number(averages?.[category.key] || 0);
@@ -395,7 +409,7 @@
 
   function getPageSession() {
     const params = new URLSearchParams(location.search);
-    const roomCodeFromQuery = params.get('code')?.trim().toUpperCase();
+    const roomCodeFromQuery = params.get("code")?.trim().toUpperCase();
     const stored = loadSession();
 
     if (roomCodeFromQuery && stored) {
@@ -416,7 +430,7 @@
   }
 
   function toParticipantId(authUserId) {
-    const auth = String(authUserId || '').trim();
+    const auth = String(authUserId || "").trim();
     if (auth) return `user:${auth}`;
 
     const guestId = getOrCreateGuestId();
@@ -428,7 +442,7 @@
     if (existing) return existing;
 
     const next =
-      typeof crypto !== 'undefined' && crypto.randomUUID
+      typeof crypto !== "undefined" && crypto.randomUUID
         ? crypto.randomUUID()
         : `${Date.now()}-${Math.random().toString(16).slice(2)}`;
 
@@ -436,15 +450,10 @@
     return next;
   }
 
-  function getHostUserId() {
-    const local = localStorage.getItem('mello:hostUserId');
-    return String(local || '').trim();
-  }
-
   function setStatus(el, message, isError = false) {
     if (!el) return;
     el.textContent = message;
-    el.classList.toggle('error', isError);
+    el.classList.toggle("error", isError);
   }
 
   function toDisplayNumber(value) {
@@ -453,10 +462,10 @@
 
   function escapeHtml(value) {
     return String(value)
-      .replaceAll('&', '&amp;')
-      .replaceAll('<', '&lt;')
-      .replaceAll('>', '&gt;')
-      .replaceAll('"', '&quot;')
-      .replaceAll("'", '&#39;');
+      .replaceAll("&", "&amp;")
+      .replaceAll("<", "&lt;")
+      .replaceAll(">", "&gt;")
+      .replaceAll('"', "&quot;")
+      .replaceAll("'", "&#39;");
   }
 })();

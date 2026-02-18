@@ -1,68 +1,97 @@
-const store = {
-  rooms: new Map(),
-  participantsByRoom: new Map(),
-  submissionsByRoom: new Map(),
-};
+// db.js
+const { MongoClient } = require("mongodb");
+
+let client;
+let db;
 
 async function connectDb() {
-  return Promise.resolve();
+  if (db) return db;
+
+  const uri = process.env.MONGODB_URI;
+  if (!uri) throw new Error("Missing MONGODB_URI");
+
+  client = new MongoClient(uri);
+  await client.connect();
+
+  db = client.db(process.env.MONGODB_DB || "mello");
+
+  // collections
+  const rooms = db.collection("rooms");
+  const participants = db.collection("participants");
+  const submissions = db.collection("submissions");
+
+  // indexes
+  await rooms.createIndex({ code: 1 }, { unique: true });
+  await participants.createIndex(
+    { roomCode: 1, participantId: 1 },
+    { unique: true },
+  );
+  await submissions.createIndex(
+    { roomCode: 1, participantId: 1 },
+    { unique: true },
+  );
+
+  return db;
 }
 
-function getRoom(code) {
-  return store.rooms.get(code) || null;
+function col(name) {
+  if (!db) throw new Error("DB not connected. Call connectDb() first.");
+  return db.collection(name);
 }
 
-function saveRoom(room) {
-  store.rooms.set(room.code, room);
-  return room;
+async function getRoom(code) {
+  return col("rooms").findOne({ code });
 }
 
-function getParticipantsMap(roomCode) {
-  if (!store.participantsByRoom.has(roomCode)) {
-    store.participantsByRoom.set(roomCode, new Map());
-  }
-  return store.participantsByRoom.get(roomCode);
+async function saveRoom(room) {
+  // ensure plain object
+  const doc = { ...room, createdAt: room.createdAt || new Date() };
+  await col("rooms").insertOne(doc);
+  return doc;
 }
 
-function upsertParticipant(roomCode, participant) {
-  const participants = getParticipantsMap(roomCode);
-  const existing = participants.get(participant.participantId);
-  const next = {
-    ...existing,
-    ...participant,
+async function upsertParticipant(roomCode, participant) {
+  const doc = {
     roomCode,
-    joinedAt: existing?.joinedAt || new Date(),
+    participantId: participant.participantId,
+    displayName: participant.displayName,
   };
-  participants.set(participant.participantId, next);
-  return next;
+
+  const result = await col("participants").findOneAndUpdate(
+    { roomCode, participantId: doc.participantId },
+    {
+      $set: { displayName: doc.displayName },
+      $setOnInsert: { joinedAt: new Date() },
+    },
+    { upsert: true, returnDocument: "after" },
+  );
+
+  return result.value;
 }
 
-function getSubmissionsMap(roomCode) {
-  if (!store.submissionsByRoom.has(roomCode)) {
-    store.submissionsByRoom.set(roomCode, new Map());
-  }
-  return store.submissionsByRoom.get(roomCode);
-}
-
-function upsertSubmission(roomCode, submission) {
-  const submissions = getSubmissionsMap(roomCode);
-  const next = {
-    ...submission,
+async function upsertSubmission(roomCode, submission) {
+  const doc = {
     roomCode,
-    updatedAt: new Date(),
+    participantId: submission.participantId,
+    displayName: submission.displayName,
+    votes: submission.votes,
   };
-  submissions.set(submission.participantId, next);
-  return next;
+
+  const result = await col("submissions").findOneAndUpdate(
+    { roomCode, participantId: doc.participantId },
+    { $set: { ...doc, updatedAt: new Date() } },
+    { upsert: true, returnDocument: "after" },
+  );
+
+  return result.value;
 }
 
-function getSubmission(roomCode, participantId) {
-  const submissions = getSubmissionsMap(roomCode);
-  return submissions.get(participantId) || null;
+async function getSubmission(roomCode, participantId) {
+  return col("submissions").findOne({ roomCode, participantId });
 }
 
-function listSubmissions(roomCode) {
-  const submissions = getSubmissionsMap(roomCode);
-  return [...submissions.values()];
+async function listSubmissions(roomCode) {
+  return col("submissions").find({ roomCode }).toArray();
 }
 
 module.exports = {

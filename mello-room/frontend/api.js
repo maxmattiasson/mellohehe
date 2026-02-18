@@ -23,10 +23,9 @@ async function request(path, options = {}) {
   return payload;
 }
 
-function createRoom(hostUserId) {
+function createRoom() {
   return request('', {
     method: 'POST',
-    body: JSON.stringify({ hostUserId }),
   });
 }
 
