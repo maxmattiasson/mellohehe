@@ -2,6 +2,13 @@ const App = (() => {
   const CATEGORIES = ["Slay", "Utseende", "Låt", "Sångröst"];
   const BIDRAG_COUNT = 6;
   const DEFAULT_SCORE = 3;
+  const VALUE_EMOJIS = {
+    1: "😬",
+    2: "😐",
+    3: "😊",
+    4: "😎",
+    5: "🔥",
+  };
   const STORAGE_KEYS = {
     username: "mello:username",
     scores: "mello:scores",
@@ -111,10 +118,11 @@ const App = (() => {
     slider.id = sliderId;
     slider.dataset.bidrag = bidragId;
     slider.dataset.category = category;
+    updateSliderVisual(slider, value);
 
     const valueBox = document.createElement("output");
     valueBox.className = "value-box";
-    valueBox.textContent = String(value);
+    valueBox.textContent = formatSliderValue(value);
     valueBox.setAttribute("for", sliderId);
 
     label.append(text, slider, valueBox);
@@ -158,10 +166,28 @@ const App = (() => {
     const value = Number(slider.value);
 
     state.scores[bidragId][category] = value;
-    slider.nextElementSibling.textContent = String(value);
+    updateSliderVisual(slider, value);
+    slider.nextElementSibling.textContent = formatSliderValue(value);
+    animateValueBox(slider.nextElementSibling);
     updateBidragTotalInput(bidragId);
     renderRanking();
     saveScores(state.scores);
+  }
+
+  function updateSliderVisual(slider, value) {
+    const percent = ((value - 1) / 4) * 100;
+    slider.style.setProperty("--slider-progress", `${percent}%`);
+    slider.setAttribute("aria-valuetext", formatSliderValue(value));
+  }
+
+  function formatSliderValue(value) {
+    return `${value} ${VALUE_EMOJIS[value] || ""}`.trim();
+  }
+
+  function animateValueBox(valueBox) {
+    valueBox.classList.remove("pop");
+    void valueBox.offsetWidth;
+    valueBox.classList.add("pop");
   }
 
   function updateBidragTotalInput(bidragId) {
