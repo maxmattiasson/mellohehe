@@ -1,4 +1,5 @@
 const express = require("express");
+const rateLimit = require("express-rate-limit");
 const Room = require("../models/Room");
 const Participant = require("../models/Participant");
 const Submission = require("../models/Submission");
@@ -14,6 +15,13 @@ const { generateUniqueRoomCode } = require("../services/code.service");
 const { calculateTotals, CATEGORIES } = require("../services/results.service");
 
 const router = express.Router();
+const createRoomLimiter = rateLimit({
+  windowMs: 60 * 1000, // 1 minute
+  max: 5, // 5 room creations / minute / IP
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { error: "Too many rooms created. Try again in a minute." },
+});
 
 function badRequest(res, message) {
   return res.status(400).json({ error: message });
@@ -62,7 +70,7 @@ function validateVotes(votes) {
   return null;
 }
 
-router.post("/", async (_req, res, next) => {
+router.post("/", createRoomLimiter, async (_req, res, next) => {
   const MAX_ATTEMPTS = 10;
 
   for (let attempt = 0; attempt < MAX_ATTEMPTS; attempt += 1) {
