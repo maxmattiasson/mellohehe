@@ -23,35 +23,16 @@
 
   function initHomePage() {
     const displayNameInput = document.querySelector('#displayName');
-    const authUserIdInput = document.querySelector('#authUserId');
-    const hostUserIdInput = document.querySelector('#hostUserId');
     const joinCodeInput = document.querySelector('#joinCode');
     const createBtn = document.querySelector('#createRoomBtn');
     const joinBtn = document.querySelector('#joinRoomBtn');
     const statusEl = document.querySelector('#homeStatus');
-    const summaryEl = document.querySelector('#identitySummary');
 
     const identity = loadIdentity();
     displayNameInput.value = identity.displayName || '';
-    authUserIdInput.value = identity.authUserId || '';
-    hostUserIdInput.value = identity.hostUserId || '';
-
-    renderIdentitySummary(summaryEl, identity);
 
     displayNameInput.addEventListener('input', () => {
       const next = { ...loadIdentity(), displayName: displayNameInput.value.trim() };
-      saveIdentity(next);
-      renderIdentitySummary(summaryEl, next);
-    });
-
-    authUserIdInput.addEventListener('input', () => {
-      const next = { ...loadIdentity(), authUserId: authUserIdInput.value.trim() };
-      saveIdentity(next);
-      renderIdentitySummary(summaryEl, next);
-    });
-
-    hostUserIdInput.addEventListener('input', () => {
-      const next = { ...loadIdentity(), hostUserId: hostUserIdInput.value.trim() };
       saveIdentity(next);
     });
 
@@ -59,11 +40,13 @@
       try {
         const current = loadIdentity();
         const displayName = current.displayName || displayNameInput.value.trim();
-        const authUserId = current.authUserId || authUserIdInput.value.trim();
-        const hostUserId = current.hostUserId || hostUserIdInput.value.trim() || authUserId;
+        const authUserId = current.authUserId;
+        const hostUserId = getHostUserId();
 
         if (!displayName) throw new Error('Display name is required');
-        if (!hostUserId) throw new Error('Host User ID is required to create a room');
+        if (!hostUserId) {
+          throw new Error('Host user ID missing. Set localStorage key "mello:hostUserId".');
+        }
 
         setStatus(statusEl, 'Creating room...');
         const { code } = await window.api.createRoom(hostUserId);
@@ -84,7 +67,7 @@
       try {
         const current = loadIdentity();
         const displayName = current.displayName || displayNameInput.value.trim();
-        const authUserId = current.authUserId || authUserIdInput.value.trim();
+        const authUserId = current.authUserId;
         const code = joinCodeInput.value.trim().toUpperCase();
 
         if (!displayName) throw new Error('Display name is required');
@@ -95,7 +78,7 @@
         setStatus(statusEl, 'Joining room...');
         await window.api.joinRoom(code, participantId, displayName);
 
-        saveIdentity({ ...current, displayName, authUserId });
+        saveIdentity({ ...current, displayName });
         saveSession({ roomCode: code, participantId, displayName });
 
         location.href = `/vote?code=${encodeURIComponent(code)}`;
@@ -453,9 +436,9 @@
     return next;
   }
 
-  function renderIdentitySummary(el, identity) {
-    const participantId = toParticipantId(identity.authUserId);
-    el.textContent = `Participant ID will be ${participantId}`;
+  function getHostUserId() {
+    const local = localStorage.getItem('mello:hostUserId');
+    return String(local || '').trim();
   }
 
   function setStatus(el, message, isError = false) {
