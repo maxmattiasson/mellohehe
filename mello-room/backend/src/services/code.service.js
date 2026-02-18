@@ -9,12 +9,8 @@ function generateRoomCode() {
   return code;
 }
 
-function generateUniqueRoomCode(existsFn, maxAttempts = 1000) {
-  for (let i = 0; i < maxAttempts; i += 1) {
-    const code = generateRoomCode();
-    if (!existsFn(code)) return code;
-  }
-  throw new Error('Could not generate a unique room code');
+function generateUniqueRoomCode() {
+  return generateRoomCode();
 }
 
 module.exports = {

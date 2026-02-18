@@ -62,19 +62,30 @@ function validateVotes(votes) {
   return null;
 }
 
-router.post("/", (req, res) => {
-  const code = generateUniqueRoomCode((candidate) =>
-    Boolean(getRoom(candidate)),
-  );
-  const room = new Room({ code });
-  saveRoom(room);
+router.post("/", async (_req, res, next) => {
+  const MAX_ATTEMPTS = 10;
 
-  return res.status(201).json({ code });
+  for (let attempt = 0; attempt < MAX_ATTEMPTS; attempt += 1) {
+    const code = generateUniqueRoomCode();
+    const room = new Room({ code });
+
+    try {
+      await saveRoom(room);
+      return res.status(201).json({ code });
+    } catch (error) {
+      if (error?.code === 11000) continue;
+      return next(error);
+    }
+  }
+
+  return res
+    .status(503)
+    .json({ error: "failed to allocate room code, please retry" });
 });
 
-router.post("/:code/join", (req, res) => {
+router.post("/:code/join", async (req, res) => {
   const roomCode = normalizeRoomCode(req.params.code);
-  const room = getRoom(roomCode);
+  const room = await getRoom(roomCode);
   if (!room) return res.status(404).json({ error: "room not found" });
 
   const participantId = String(req.body?.participantId || "").trim();
@@ -84,14 +95,14 @@ router.post("/:code/join", (req, res) => {
   if (!displayName) return badRequest(res, "displayName is required");
 
   const participant = new Participant({ roomCode, participantId, displayName });
-  upsertParticipant(roomCode, participant);
+  await upsertParticipant(roomCode, participant);
 
   return res.json({ ok: true });
 });
 
-router.put("/:code/votes", (req, res) => {
+router.put("/:code/votes", async (req, res) => {
   const roomCode = normalizeRoomCode(req.params.code);
-  const room = getRoom(roomCode);
+  const room = await getRoom(roomCode);
   if (!room) return res.status(404).json({ error: "room not found" });
 
   const participantId = String(req.body?.participantId || "").trim();
@@ -104,7 +115,7 @@ router.put("/:code/votes", (req, res) => {
   const voteError = validateVotes(votes);
   if (voteError) return badRequest(res, voteError);
 
-  upsertParticipant(
+  await upsertParticipant(
     roomCode,
     new Participant({ roomCode, participantId, displayName }),
   );
@@ -115,29 +126,29 @@ router.put("/:code/votes", (req, res) => {
     displayName,
     votes,
   });
-  upsertSubmission(roomCode, submission);
+  await upsertSubmission(roomCode, submission);
 
   return res.json({ ok: true });
 });
 
-router.get("/:code/votes/:participantId", (req, res) => {
+router.get("/:code/votes/:participantId", async (req, res) => {
   const roomCode = normalizeRoomCode(req.params.code);
-  const room = getRoom(roomCode);
+  const room = await getRoom(roomCode);
   if (!room) return res.status(404).json({ error: "room not found" });
 
   const participantId = String(req.params.participantId || "").trim();
   if (!participantId) return badRequest(res, "participantId is required");
 
-  const submission = getSubmission(roomCode, participantId);
+  const submission = await getSubmission(roomCode, participantId);
   return res.json({ votes: submission?.votes || {} });
 });
 
-router.get("/:code/totals", (req, res) => {
+router.get("/:code/totals", async (req, res) => {
   const roomCode = normalizeRoomCode(req.params.code);
-  const room = getRoom(roomCode);
+  const room = await getRoom(roomCode);
   if (!room) return res.status(404).json({ error: "room not found" });
 
-  const submissions = listSubmissions(roomCode);
+  const submissions = await listSubmissions(roomCode);
   return res.json(calculateTotals(submissions));
 });
 
