@@ -8,24 +8,28 @@
   </head>
   <body data-page="home">
     <main class="shell">
-      <h1>Mello Room</h1>
+      <h1>Mello-i-soffan</h1>
 
       <section class="card form-card">
-        <h2>Identity</h2>
+        <h2>Visningsnamn</h2>
         <label class="field">
-          <span>Username</span>
           <input id="displayName" type="text" placeholder="Your name" />
         </label>
       </section>
 
       <section class="card form-card">
-        <h2>Room Actions</h2>
+        <h2>Hoppa in</h2>
         <div class="row">
           <button id="createRoomBtn" class="btn">Create Room</button>
         </div>
 
         <div class="row join-row">
-          <input id="joinCode" type="text" maxlength="6" placeholder="Room code" />
+          <input
+            id="joinCode"
+            type="text"
+            maxlength="6"
+            placeholder="Room code"
+          />
           <button id="joinRoomBtn" class="btn">Join Room</button>
         </div>
 
@@ -34,6 +38,7 @@
     </main>
 
     <script src="api.js"></script>
-    <script src="main.js"></script>
+    <script src="common.js"></script>
+    <script src="home.js"></script>
   </body>
 </html>
