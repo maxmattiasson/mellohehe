@@ -1,9 +1,16 @@
 class Submission {
-  constructor({ id, roomId, participantId, scores = {} }) {
-    this.id = id;
-    this.roomId = roomId;
+  constructor({
+    roomCode,
+    participantId,
+    displayName,
+    votes,
+    updatedAt = new Date(),
+  }) {
+    this.roomCode = roomCode;
     this.participantId = participantId;
-    this.scores = scores;
+    this.displayName = displayName;
+    this.votes = votes;
+    this.updatedAt = updatedAt;
   }
 }
 

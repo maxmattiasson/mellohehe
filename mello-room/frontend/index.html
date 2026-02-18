@@ -3,33 +3,49 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Mello</title>
+    <title>Mello Room</title>
     <link rel="stylesheet" href="style.css" />
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link
-      href="https://fonts.googleapis.com/css2?family=Bungee+Shade&family=JetBrains+Mono:ital,wght@0,100..800;1,100..800&family=Rubik+Doodle+Shadow&display=swap"
-      rel="stylesheet"
-    />
   </head>
-  <body>
-    <main class="app">
-      <h1>Mello-i-soffan</h1>
-      <section class="user-panel">
-        <label for="username">Användarnamn</label>
-        <input
-          id="username"
-          type="text"
-          placeholder="Skriv ditt namn"
-          autocomplete="name"
-        />
+  <body data-page="home">
+    <main class="shell">
+      <h1>Mello Room</h1>
+
+      <section class="card form-card">
+        <h2>Identity</h2>
+        <label class="field">
+          <span>Display Name</span>
+          <input id="displayName" type="text" placeholder="Your name" />
+        </label>
+
+        <label class="field">
+          <span>Auth User ID (optional)</span>
+          <input id="authUserId" type="text" placeholder="e.g. user_123" />
+        </label>
+
+        <label class="field">
+          <span>Host User ID (for create)</span>
+          <input id="hostUserId" type="text" placeholder="Required to create room" />
+        </label>
+
+        <p class="muted" id="identitySummary"></p>
       </section>
-      <section class="cont" id="bidrag-list"></section>
-      <section class="ranking-panel">
-        <h2>Ranking</h2>
-        <ol id="ranking-list"></ol>
+
+      <section class="card form-card">
+        <h2>Room Actions</h2>
+        <div class="row">
+          <button id="createRoomBtn" class="btn">Create Room</button>
+        </div>
+
+        <div class="row join-row">
+          <input id="joinCode" type="text" maxlength="6" placeholder="Room code" />
+          <button id="joinRoomBtn" class="btn">Join Room</button>
+        </div>
+
+        <p id="homeStatus" class="status"></p>
       </section>
     </main>
+
+    <script src="api.js"></script>
     <script src="main.js"></script>
   </body>
 </html>

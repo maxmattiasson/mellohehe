@@ -1,8 +1,8 @@
 class Room {
-  constructor({ id, code, participants = [] }) {
-    this.id = id;
+  constructor({ code, hostUserId, createdAt = new Date() }) {
     this.code = code;
-    this.participants = participants;
+    this.hostUserId = hostUserId;
+    this.createdAt = createdAt;
   }
 }
 

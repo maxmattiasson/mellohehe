@@ -1,8 +1,9 @@
 class Participant {
-  constructor({ id, username, roomId }) {
-    this.id = id;
-    this.username = username;
-    this.roomId = roomId;
+  constructor({ roomCode, participantId, displayName, joinedAt = new Date() }) {
+    this.roomCode = roomCode;
+    this.participantId = participantId;
+    this.displayName = displayName;
+    this.joinedAt = joinedAt;
   }
 }
 

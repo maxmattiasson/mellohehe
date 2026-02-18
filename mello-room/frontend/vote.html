@@ -6,10 +6,22 @@
     <title>Mello Vote</title>
     <link rel="stylesheet" href="style.css" />
   </head>
-  <body>
-    <main class="app">
-      <h1>Mello Vote</h1>
-      <p>Coming soon.</p>
+  <body data-page="vote">
+    <main class="shell">
+      <header class="card page-head">
+        <h1>Vote</h1>
+        <p id="voteMeta" class="muted"></p>
+        <div class="row">
+          <a id="resultsLink" class="btn btn-link" href="#">Open Live Results</a>
+          <button id="saveVotesBtn" class="btn">Save Now</button>
+        </div>
+        <p id="saveStatus" class="status"></p>
+      </header>
+
+      <section class="grid" id="voteGrid"></section>
     </main>
+
+    <script src="api.js"></script>
+    <script src="main.js"></script>
   </body>
 </html>
