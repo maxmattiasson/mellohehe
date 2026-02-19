@@ -216,7 +216,7 @@ select:focus {
 
 .slider-row {
   display: grid;
-  grid-template-columns: 88px 1fr 42px;
+  grid-template-columns: 88px 1fr 74px;
   gap: 8px;
   align-items: center;
   padding: 6px 8px;
@@ -239,43 +239,76 @@ select:focus {
 }
 
 .vote-slider {
-  --progress: 44%;
+  --progress: 0%;
   appearance: none;
   -webkit-appearance: none;
   width: 100%;
   height: 10px;
   border-radius: 999px;
   border: 1px solid var(--border);
-  background: linear-gradient(
-    90deg,
-    #ff7d1f 0%,
-    #ffde59 var(--progress),
-    rgba(21, 39, 58, 0.16) var(--progress),
-    rgba(21, 39, 58, 0.16) 100%
-  );
+
+  background:
+    linear-gradient(90deg, #3b82f6 0%, #3b82f6 100%) 0 / var(--progress) 100%
+      no-repeat,
+    rgba(21, 39, 58, 0.16);
 }
 
 .vote-slider::-webkit-slider-thumb {
   appearance: none;
   -webkit-appearance: none;
-  width: 18px;
-  height: 18px;
+  width: 30px;
+  height: 30px;
   border-radius: 50%;
-  border: 2px solid #fff;
-  background: #17395c;
-  transition: transform 120ms ease;
+  border: 0;
+  background: transparent;
+  box-shadow: none;
+  transition:
+    transform 140ms ease,
+    box-shadow 140ms ease,
+    opacity 140ms ease;
+  opacity: 0;
 }
 
 .vote-slider:active::-webkit-slider-thumb {
-  transform: scale(1.12);
+  transform: scale(1.08);
+  opacity: 0;
 }
 
 .vote-slider::-moz-range-thumb {
-  width: 18px;
-  height: 18px;
+  width: 30px;
+  height: 30px;
   border-radius: 50%;
-  border: 2px solid #fff;
-  background: #17395c;
+  border: 0;
+  background: transparent;
+  box-shadow: none;
+}
+
+.slider-control {
+  position: relative;
+  min-height: 26px;
+}
+
+.slider-emoji {
+  position: absolute;
+  top: 50%;
+  left: var(--progress);
+  transform: translate(-50%, -51%);
+  width: 30px;
+  height: 30px;
+  display: grid;
+  place-items: center;
+  font-size: 1.6rem;
+  line-height: 1;
+  pointer-events: none;
+  filter: drop-shadow(0 2px 2px rgba(21, 39, 58, 0.4));
+  transition:
+    left 120ms ease,
+    transform 120ms ease;
+}
+
+.slider-row:focus-within .slider-emoji,
+.vote-slider:active + .slider-emoji {
+  transform: translate(-50%, -51%) scale(1.1);
 }
 
 .value-chip {
@@ -311,17 +344,17 @@ select:focus {
 
 .rank-1 {
   border-color: rgba(255, 215, 0, 0.55);
-  background: rgba(255, 215, 0, 0.14);
+  background: rgba(237, 218, 75, 0.558);
 }
 
 .rank-2 {
   border-color: rgba(192, 192, 192, 0.52);
-  background: rgba(192, 192, 192, 0.14);
+  background: rgba(255, 240, 240, 0.627);
 }
 
 .rank-3 {
   border-color: rgba(205, 127, 50, 0.52);
-  background: rgba(205, 127, 50, 0.15);
+  background: rgba(216, 123, 30, 0.599);
 }
 
 @keyframes chipPulse {

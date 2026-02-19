@@ -9,6 +9,7 @@
   ];
   const SCORE_MIN = 1;
   const SCORE_MAX = 5;
+  const SCORE_DEFAULT = 3;
 
   const STORAGE_KEYS = {
     guestId: "mello:guestId",
@@ -129,7 +130,7 @@
       const bidragId = `bidrag-${i}`;
       votes[bidragId] = {};
       CATEGORIES.forEach(({ key }) => {
-        votes[bidragId][key] = 5;
+        votes[bidragId][key] = SCORE_DEFAULT;
       });
     }
 
@@ -162,6 +163,14 @@
       (sum, { key }) => sum + Number(bidragVotes[key]),
       0,
     );
+  }
+
+  function scoreToEmoji(value) {
+    if (value <= 1) return "💩";
+    if (value === 2) return "😕";
+    if (value === 3) return "🙂";
+    if (value === 4) return "🤩";
+    return "🔥";
   }
 
   function getBestCategory(averages) {
@@ -209,7 +218,7 @@
 
       CATEGORIES.forEach(({ key, label }, index) => {
         const sliderId = `${bidragId}-${index}`;
-        const value = Number(votes[bidragId]?.[key] ?? SCORE_MAX);
+        const value = Number(votes[bidragId]?.[key] ?? SCORE_DEFAULT);
 
         const row = document.createElement("label");
         row.className = "slider-row";
@@ -228,13 +237,21 @@
         slider.value = String(value);
         slider.dataset.bidrag = bidragId;
         slider.dataset.category = key;
+        const sliderControl = document.createElement("div");
+        sliderControl.className = "slider-control";
+
+        const emojiKnob = document.createElement("span");
+        emojiKnob.className = "slider-emoji";
+        emojiKnob.textContent = scoreToEmoji(value);
+
+        sliderControl.append(slider, emojiKnob);
         setSliderProgress(slider, value);
 
         const valueEl = document.createElement("output");
         valueEl.className = "value-chip";
         valueEl.textContent = String(value);
 
-        row.append(labelEl, slider, valueEl);
+        row.append(labelEl, sliderControl, valueEl);
         rows.append(row);
       });
 
@@ -308,6 +325,13 @@
   function setSliderProgress(slider, value) {
     const percent = ((value - SCORE_MIN) / (SCORE_MAX - SCORE_MIN)) * 100;
     slider.style.setProperty("--progress", `${percent}%`);
+    const emoji = slider
+      .closest(".slider-control")
+      ?.querySelector(".slider-emoji");
+    if (emoji) {
+      emoji.style.left = `${percent}%`;
+      emoji.textContent = scoreToEmoji(value);
+    }
   }
 
   function updateBidragTotal(container, bidragId, bidragVotes) {
