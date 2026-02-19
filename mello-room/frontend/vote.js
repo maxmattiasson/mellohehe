@@ -1,8 +1,11 @@
 (() => {
   const {
+    buildDefaultEntries,
     buildDefaultVotes,
     getPageSession,
     mergeVotes,
+    normalizeBidragCount,
+    normalizeEntries,
     renderVoteGrid,
     setStatus,
     updateBidragTotal,
@@ -59,22 +62,30 @@
       roomCode,
       participantId,
       displayName,
+      bidragCount: 6,
+      entries: buildDefaultEntries(),
       votes: buildDefaultVotes(),
       saveTimer: null,
       saveInFlight: false,
     };
 
-    renderVoteGrid(gridEl, state.votes);
+    renderVoteGrid(gridEl, state.votes, state.entries, state.bidragCount);
 
-    window.api
-      .getVotes(roomCode, participantId)
-      .then(({ votes }) => {
-        state.votes = mergeVotes(votes);
-        renderVoteGrid(gridEl, state.votes);
-      })
-      .catch(() => {
-        // Keep defaults if no prior submission exists.
-      });
+    Promise.allSettled([
+      window.api.getRoom(roomCode),
+      window.api.getVotes(roomCode, participantId),
+    ]).then(([roomResult, votesResult]) => {
+      if (roomResult.status === "fulfilled") {
+        const room = roomResult.value || {};
+        state.bidragCount = normalizeBidragCount(room.bidragCount, 6);
+        state.entries = normalizeEntries(room.entries, state.bidragCount);
+      }
+
+      const incomingVotes =
+        votesResult.status === "fulfilled" ? votesResult.value?.votes : {};
+      state.votes = mergeVotes(incomingVotes, state.bidragCount);
+      renderVoteGrid(gridEl, state.votes, state.entries, state.bidragCount);
+    });
 
     gridEl.addEventListener("input", (event) => {
       if (!event.target.classList.contains("vote-slider")) return;

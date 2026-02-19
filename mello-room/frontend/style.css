@@ -84,7 +84,8 @@ h1 {
   font-weight: 700;
 }
 
-input {
+input,
+select {
   height: 40px;
   border-radius: 10px;
   border: 1px solid var(--border);
@@ -94,7 +95,8 @@ input {
   padding: 0 10px;
 }
 
-input:focus {
+input:focus,
+select:focus {
   outline: 2px solid rgba(21, 39, 58, 0.2);
   outline-offset: 1px;
 }
@@ -119,6 +121,36 @@ input:focus {
 .join-row input {
   flex: 1;
   min-width: 160px;
+}
+
+.entries-grid {
+  display: grid;
+  gap: 8px;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+}
+
+.modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(21, 39, 58, 0.45);
+  display: grid;
+  place-items: center;
+  padding: 14px;
+  z-index: 20;
+}
+
+.modal-card {
+  width: min(720px, 100%);
+  display: grid;
+  gap: 12px;
+}
+
+.modal-actions {
+  justify-content: flex-end;
+}
+
+.hidden {
+  display: none;
 }
 
 .btn {

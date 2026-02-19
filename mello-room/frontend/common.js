@@ -1,5 +1,6 @@
 (() => {
-  const BIDRAG_COUNT = 5;
+  const DEFAULT_BIDRAG_COUNT = 6;
+  const MAX_BIDRAG_COUNT = 12;
   const CATEGORIES = [
     { key: "slay", label: "Slay" },
     { key: "utseende", label: "Utseende" },
@@ -14,6 +15,36 @@
     identity: "mello:identity",
     session: "mello:session",
   };
+
+  function normalizeBidragCount(rawCount, fallback = DEFAULT_BIDRAG_COUNT) {
+    const count = Number(rawCount);
+    if (Number.isInteger(count) && count >= 1 && count <= MAX_BIDRAG_COUNT) {
+      return count;
+    }
+
+    return fallback;
+  }
+
+  function buildDefaultEntries(bidragCount = DEFAULT_BIDRAG_COUNT) {
+    return Array.from({ length: bidragCount }, (_unused, index) => {
+      return `Bidrag ${index + 1}`;
+    });
+  }
+
+  function normalizeEntries(entries, bidragCount = DEFAULT_BIDRAG_COUNT) {
+    const count = normalizeBidragCount(bidragCount, DEFAULT_BIDRAG_COUNT);
+    const defaults = buildDefaultEntries(count);
+    if (!Array.isArray(entries)) {
+      return defaults;
+    }
+
+    return defaults.map((_defaultEntry, index) => {
+      const entry = entries[index];
+      if (typeof entry !== "string") return defaults[index];
+      const trimmed = entry.trim();
+      return trimmed || defaults[index];
+    });
+  }
 
   function loadIdentity() {
     try {
@@ -90,10 +121,11 @@
     el.classList.toggle("error", isError);
   }
 
-  function buildDefaultVotes() {
+  function buildDefaultVotes(bidragCount = DEFAULT_BIDRAG_COUNT) {
+    const count = normalizeBidragCount(bidragCount, DEFAULT_BIDRAG_COUNT);
     const votes = {};
 
-    for (let i = 1; i <= BIDRAG_COUNT; i += 1) {
+    for (let i = 1; i <= count; i += 1) {
       const bidragId = `bidrag-${i}`;
       votes[bidragId] = {};
       CATEGORIES.forEach(({ key }) => {
@@ -104,8 +136,8 @@
     return votes;
   }
 
-  function mergeVotes(votes) {
-    const merged = buildDefaultVotes();
+  function mergeVotes(votes, bidragCount = DEFAULT_BIDRAG_COUNT) {
+    const merged = buildDefaultVotes(bidragCount);
 
     Object.keys(votes || {}).forEach((bidragId) => {
       if (!merged[bidragId]) return;
@@ -149,17 +181,27 @@
     return best;
   }
 
-  function renderVoteGrid(container, votes) {
+  function renderVoteGrid(
+    container,
+    votes,
+    entries = buildDefaultEntries(),
+    bidragCount = entries.length,
+  ) {
     container.innerHTML = "";
+    const count = normalizeBidragCount(
+      bidragCount,
+      entries.length || DEFAULT_BIDRAG_COUNT,
+    );
+    const labels = normalizeEntries(entries, count);
 
-    for (let i = 1; i <= BIDRAG_COUNT; i += 1) {
+    for (let i = 1; i <= count; i += 1) {
       const bidragId = `bidrag-${i}`;
       const card = document.createElement("article");
       card.className = "card vote-card";
       card.dataset.bidrag = bidragId;
 
       const title = document.createElement("h2");
-      title.textContent = `Bidrag ${i}`;
+      title.textContent = labels[i - 1];
       card.append(title);
 
       const rows = document.createElement("div");
@@ -167,7 +209,7 @@
 
       CATEGORIES.forEach(({ key, label }, index) => {
         const sliderId = `${bidragId}-${index}`;
-        const value = Number(votes[bidragId][key]);
+        const value = Number(votes[bidragId]?.[key] ?? SCORE_MAX);
 
         const row = document.createElement("label");
         row.className = "slider-row";
@@ -208,8 +250,18 @@
     }
   }
 
-  function renderTotals(container, bidragResults) {
+  function renderTotals(
+    container,
+    bidragResults,
+    entries = buildDefaultEntries(),
+    bidragCount = entries.length,
+  ) {
     container.innerHTML = "";
+    const count = normalizeBidragCount(
+      bidragCount,
+      entries.length || DEFAULT_BIDRAG_COUNT,
+    );
+    const labels = normalizeEntries(entries, count);
 
     if (!bidragResults.length) {
       container.innerHTML =
@@ -222,13 +274,15 @@
       const categoryHtml = CATEGORIES.map(({ key, label }) => {
         return `<li><strong>${label}:</strong> ${toDisplayNumber(result.averages[key])}</li>`;
       }).join("");
+      const bidragNumber = Number(String(result.bidragId).split("-")[1]);
+      const bidragLabel = labels[bidragNumber - 1] || `Bidrag ${bidragNumber}`;
 
       const medalClass = idx < 3 ? ` rank-${idx + 1}` : "";
 
       container.insertAdjacentHTML(
         "beforeend",
         `<article class="card result-card${medalClass}">
-          <h2>${escapeHtml(result.bidragId.replace("bidrag-", "Bidrag "))}</h2>
+          <h2>${escapeHtml(bidragLabel)}</h2>
           <p><strong>Total Avg:</strong> ${toDisplayNumber(result.totalAvg)}</p>
           <p><strong>Votes Count:</strong> ${result.votesCount}</p>
           <p class="muted">Top category: ${escapeHtml(bestCategory.label)} (${toDisplayNumber(bestCategory.value)})</p>
@@ -276,11 +330,14 @@
   }
 
   window.melloCommon = {
+    buildDefaultEntries,
     buildDefaultVotes,
     escapeHtml,
     getPageSession,
     loadIdentity,
     mergeVotes,
+    normalizeEntries,
+    normalizeBidragCount,
     renderTotals,
     renderVoteGrid,
     saveIdentity,

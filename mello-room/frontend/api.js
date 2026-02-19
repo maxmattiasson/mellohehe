@@ -1,9 +1,9 @@
-const API_BASE = '/api/rooms';
+const API_BASE = "/api/rooms";
 
 async function request(path, options = {}) {
   const response = await fetch(`${API_BASE}${path}`, {
     headers: {
-      'Content-Type': 'application/json',
+      "Content-Type": "application/json",
       ...(options.headers || {}),
     },
     ...options,
@@ -23,36 +23,48 @@ async function request(path, options = {}) {
   return payload;
 }
 
-function createRoom() {
-  return request('', {
-    method: 'POST',
+function createRoom(entries, bidragCount) {
+  const body = {};
+  if (Array.isArray(entries)) body.entries = entries;
+  if (Number.isInteger(bidragCount)) body.bidragCount = bidragCount;
+
+  return request("", {
+    method: "POST",
+    body: JSON.stringify(body),
   });
 }
 
 function joinRoom(code, participantId, displayName) {
   return request(`/${encodeURIComponent(code)}/join`, {
-    method: 'POST',
+    method: "POST",
     body: JSON.stringify({ participantId, displayName }),
   });
 }
 
 function saveVotes(code, participantId, displayName, votes) {
   return request(`/${encodeURIComponent(code)}/votes`, {
-    method: 'PUT',
+    method: "PUT",
     body: JSON.stringify({ participantId, displayName, votes }),
   });
 }
 
 function getVotes(code, participantId) {
-  return request(`/${encodeURIComponent(code)}/votes/${encodeURIComponent(participantId)}`);
+  return request(
+    `/${encodeURIComponent(code)}/votes/${encodeURIComponent(participantId)}`,
+  );
 }
 
 function getTotals(code) {
   return request(`/${encodeURIComponent(code)}/totals`);
 }
 
+function getRoom(code) {
+  return request(`/${encodeURIComponent(code)}`);
+}
+
 window.api = {
   createRoom,
+  getRoom,
   joinRoom,
   saveVotes,
   getVotes,

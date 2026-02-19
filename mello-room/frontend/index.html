@@ -43,6 +43,31 @@
       </section>
     </main>
 
+    <div
+      id="createRoomModal"
+      class="modal-backdrop hidden"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="createRoomTitle"
+    >
+      <section class="card modal-card">
+        <h2 id="createRoomTitle">Name Your Bidrag</h2>
+        <label class="field">
+          <span>Antal bidrag</span>
+          <select id="bidragCountSelect"></select>
+        </label>
+        <div id="entriesGrid" class="entries-grid"></div>
+        <div class="row modal-actions">
+          <button id="cancelCreateRoomBtn" class="btn" type="button">
+            Cancel
+          </button>
+          <button id="confirmCreateRoomBtn" class="btn" type="button">
+            Save & Create Room
+          </button>
+        </div>
+      </section>
+    </div>
+
     <script src="api.js"></script>
     <script src="common.js"></script>
     <script src="home.js"></script>

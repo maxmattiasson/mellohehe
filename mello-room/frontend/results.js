@@ -1,5 +1,12 @@
 (() => {
-  const { escapeHtml, getPageSession, renderTotals } = window.melloCommon;
+  const {
+    buildDefaultEntries,
+    escapeHtml,
+    getPageSession,
+    normalizeBidragCount,
+    normalizeEntries,
+    renderTotals,
+  } = window.melloCommon;
 
   function initResultsPage() {
     const listEl = document.querySelector("#resultsList");
@@ -14,13 +21,29 @@
     }
 
     const { roomCode } = session;
+    const state = { bidragCount: 6, entries: buildDefaultEntries() };
     metaEl.textContent = `Live totals for room ${roomCode}. Refresh every 3s.`;
     backLink.href = `/vote?code=${encodeURIComponent(roomCode)}`;
+
+    window.api
+      .getRoom(roomCode)
+      .then(({ bidragCount, entries }) => {
+        state.bidragCount = normalizeBidragCount(bidragCount, 6);
+        state.entries = normalizeEntries(entries, state.bidragCount);
+      })
+      .catch(() => {
+        // Keep default labels if room metadata is unavailable.
+      });
 
     async function fetchAndRender() {
       try {
         const payload = await window.api.getTotals(roomCode);
-        renderTotals(listEl, payload.bidragResults || []);
+        renderTotals(
+          listEl,
+          payload.bidragResults || [],
+          state.entries,
+          state.bidragCount,
+        );
       } catch (error) {
         listEl.innerHTML = `<article class="card"><p class="status error">${escapeHtml(error.message)}</p></article>`;
       }
