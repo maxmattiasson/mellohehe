@@ -19,9 +19,16 @@ body {
   font-family: "JetBrains Mono", monospace;
   color: var(--text);
   background:
-    radial-gradient(circle at 20% 20%, #fff17d 0%, transparent 35%),
+    /* radial-gradient(circle at 20% 20%, #fff17d 0%, transparent 35%),
     radial-gradient(circle at 85% 78%, #7de6ff 0%, transparent 38%),
-    linear-gradient(140deg, var(--bg-1) 0%, var(--bg-2) 50%, var(--bg-3) 100%);
+    linear-gradient(140deg, var(--bg-1) 0%, var(--bg-2) 50%, var(--bg-3) 100%); */ linear-gradient(
+    to right,
+    rgb(254, 254, 80),
+    rgb(216, 94, 206),
+    rgb(76, 223, 253),
+    rgb(216, 94, 206),
+    rgb(254, 254, 80)
+  );
   padding: 20px 14px 36px;
 }
 
@@ -31,6 +38,11 @@ body {
   display: grid;
   gap: 14px;
 }
+.shell h2 {
+  font-family: "Rubik Doodle Shadow", system-ui;
+  font-weight: 400;
+  font-style: normal;
+}
 
 h1,
 h2 {
@@ -39,6 +51,9 @@ h2 {
 
 h1 {
   font-size: clamp(1.8rem, 3.5vw, 2.9rem);
+  font-family: "Bungee Shade", sans-serif;
+  font-weight: 400;
+  font-size: 1.8rem;
 }
 
 .card {
@@ -83,6 +98,16 @@ input:focus {
   outline: 2px solid rgba(21, 39, 58, 0.2);
   outline-offset: 1px;
 }
+#home-h1 {
+  font-family: "Bungee Shade", sans-serif;
+  font-weight: 400;
+  font-size: 1.8rem;
+  max-width: 500px;
+  border-radius: 30px;
+  text-align: center;
+  background-color: rgba(255, 255, 255, 0.4);
+  width: auto;
+}
 
 .row {
   display: flex;
@@ -106,7 +131,9 @@ input:focus {
   font-weight: 700;
   cursor: pointer;
   text-decoration: none;
-  transition: transform 140ms ease, background-color 140ms ease;
+  transition:
+    transform 140ms ease,
+    background-color 140ms ease;
 }
 
 .btn:hover {
@@ -163,7 +190,9 @@ input:focus {
   padding: 6px 8px;
   border-radius: 10px;
   background: rgba(255, 255, 255, 0.4);
-  transition: transform 150ms ease, background-color 150ms ease;
+  transition:
+    transform 150ms ease,
+    background-color 150ms ease;
 }
 
 .slider-row:hover,
@@ -264,9 +293,15 @@ input:focus {
 }
 
 @keyframes chipPulse {
-  0% { transform: scale(0.93); }
-  65% { transform: scale(1.08); }
-  100% { transform: scale(1); }
+  0% {
+    transform: scale(0.93);
+  }
+  65% {
+    transform: scale(1.08);
+  }
+  100% {
+    transform: scale(1);
+  }
 }
 
 @media (max-width: 420px) {
