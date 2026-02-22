@@ -38,7 +38,8 @@
     const bodyRows = bidragRows
       .map(({ bidragId, voteRow }) => {
         const bidragNumber = Number(bidragId.split("-")[1]);
-        const bidragLabel = labels[bidragNumber - 1] || `Bidrag ${bidragNumber}`;
+        const bidragLabel =
+          labels[bidragNumber - 1] || `Bidrag ${bidragNumber}`;
         const categoryCells = categories
           .map(({ key }) => {
             const value = Number(voteRow?.[key]);
@@ -91,7 +92,7 @@
     }
 
     const { roomCode } = session;
-    metaEl.textContent = `Room ${roomCode}. Click a participant to see saved votes.`;
+    metaEl.textContent = `Room ${roomCode}. Klicka för att se varandras röster`;
     toVoteEl.href = `/vote?code=${encodeURIComponent(roomCode)}`;
     toResultsEl.href = `/results?code=${encodeURIComponent(roomCode)}`;
 
@@ -133,7 +134,7 @@
         button.textContent = participant.displayName;
         button.addEventListener("click", () => {
           state.selectedParticipantId = participant.participantId;
-          peekTitleEl.textContent = `Saved Votes: ${participant.displayName}`;
+          peekTitleEl.textContent = `${participant.displayName}`;
           renderParticipants();
           loadVotes(participant.participantId);
         });
@@ -171,7 +172,8 @@
               participant.participantId === state.selectedParticipantId,
           )
         ) {
-          state.selectedParticipantId = state.participants[0]?.participantId || null;
+          state.selectedParticipantId =
+            state.participants[0]?.participantId || null;
         }
 
         renderParticipants();
@@ -189,7 +191,7 @@
           return;
         }
 
-        peekTitleEl.textContent = `Saved Votes: ${selected.displayName}`;
+        peekTitleEl.textContent = `${selected.displayName}`;
         await loadVotes(selected.participantId);
       } catch (error) {
         listEl.innerHTML = "";

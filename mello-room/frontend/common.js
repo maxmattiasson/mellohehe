@@ -301,13 +301,15 @@
         `<article class="card result-card${medalClass}">
           <h2>${escapeHtml(bidragLabel)}</h2>
           <p><strong>Total Points:</strong> ${toDisplayNumber(result.totalPoints)}</p>
-          <p><strong>Votes Count:</strong> ${toDisplayNumber(result.votesCount)}</p>
           <p class="muted">Top category: ${escapeHtml(bestCategory.label)} (${toDisplayNumber(bestCategory.value)})</p>
           <ul class="category-list">${categoryHtml}</ul>
         </article>`,
       );
     });
   }
+  // <p>
+  //   <strong>Antal röstare:</strong> ${toDisplayNumber(result.votesCount)}
+  // </p>;
 
   function updateSliderRow(slider, value) {
     const row = slider.closest(".slider-row");
