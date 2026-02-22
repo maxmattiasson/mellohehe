@@ -13,7 +13,7 @@
   } = window.melloCommon;
 
   function queueAutosave(state, statusEl) {
-    setStatus(statusEl, "Saving...");
+    setStatus(statusEl, "Sparar...");
     clearTimeout(state.saveTimer);
     state.saveTimer = setTimeout(() => {
       persistVotes(state, statusEl).catch(() => {});
@@ -31,7 +31,7 @@
         state.displayName,
         state.votes,
       );
-      setStatus(statusEl, `Saved at ${new Date().toLocaleTimeString()}`);
+      setStatus(statusEl, `Sparat!`);
     } catch (error) {
       setStatus(statusEl, error.message, true);
       throw error;

@@ -385,7 +385,9 @@ select:focus {
 
 .total {
   font-weight: 700;
-  font-size: 0.95rem;
+  font-size: 1.1rem;
+  margin-left: auto;
+  padding: 0px 12px;
 }
 
 .result-card {
