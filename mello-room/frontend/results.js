@@ -12,6 +12,7 @@
     const listEl = document.querySelector("#resultsList");
     const metaEl = document.querySelector("#resultsMeta");
     const backLink = document.querySelector("#backToVote");
+    const lobbyLink = document.querySelector("#goToLobby");
 
     const session = getPageSession();
     if (!session) {
@@ -24,6 +25,7 @@
     const state = { bidragCount: 6, entries: buildDefaultEntries() };
     metaEl.textContent = `Live totals for room ${roomCode}. Refresh every 3s.`;
     backLink.href = `/vote?code=${encodeURIComponent(roomCode)}`;
+    lobbyLink.href = `/lobby?code=${encodeURIComponent(roomCode)}`;
 
     window.api
       .getRoom(roomCode)

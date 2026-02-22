@@ -94,6 +94,13 @@ async function listSubmissions(roomCode) {
   return col("submissions").find({ roomCode }).toArray();
 }
 
+async function listParticipants(roomCode) {
+  return col("participants")
+    .find({ roomCode })
+    .sort({ joinedAt: 1, displayName: 1 })
+    .toArray();
+}
+
 module.exports = {
   connectDb,
   getRoom,
@@ -102,4 +109,5 @@ module.exports = {
   upsertSubmission,
   getSubmission,
   listSubmissions,
+  listParticipants,
 };

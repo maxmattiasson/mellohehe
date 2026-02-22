@@ -62,9 +62,14 @@ function getRoom(code) {
   return request(`/${encodeURIComponent(code)}`);
 }
 
+function getParticipants(code) {
+  return request(`/${encodeURIComponent(code)}/participants`);
+}
+
 window.api = {
   createRoom,
   getRoom,
+  getParticipants,
   joinRoom,
   saveVotes,
   getVotes,

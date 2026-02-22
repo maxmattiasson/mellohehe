@@ -9,7 +9,7 @@
   ];
   const SCORE_MIN = 1;
   const SCORE_MAX = 5;
-  const SCORE_DEFAULT = 3;
+  const SCORE_DEFAULT = 1;
 
   const STORAGE_KEYS = {
     guestId: "mello:guestId",
@@ -287,9 +287,9 @@
     }
 
     bidragResults.forEach((result, idx) => {
-      const bestCategory = getBestCategory(result.averages);
+      const bestCategory = getBestCategory(result.categoryTotals);
       const categoryHtml = CATEGORIES.map(({ key, label }) => {
-        return `<li><strong>${label}:</strong> ${toDisplayNumber(result.averages[key])}</li>`;
+        return `<li><strong>${label}:</strong> ${toDisplayNumber(result.categoryTotals?.[key])}</li>`;
       }).join("");
       const bidragNumber = Number(String(result.bidragId).split("-")[1]);
       const bidragLabel = labels[bidragNumber - 1] || `Bidrag ${bidragNumber}`;
@@ -300,8 +300,8 @@
         "beforeend",
         `<article class="card result-card${medalClass}">
           <h2>${escapeHtml(bidragLabel)}</h2>
-          <p><strong>Total Avg:</strong> ${toDisplayNumber(result.totalAvg)}</p>
-          <p><strong>Votes Count:</strong> ${result.votesCount}</p>
+          <p><strong>Total Points:</strong> ${toDisplayNumber(result.totalPoints)}</p>
+          <p><strong>Votes Count:</strong> ${toDisplayNumber(result.votesCount)}</p>
           <p class="muted">Top category: ${escapeHtml(bestCategory.label)} (${toDisplayNumber(bestCategory.value)})</p>
           <ul class="category-list">${categoryHtml}</ul>
         </article>`,
@@ -341,7 +341,13 @@
   }
 
   function toDisplayNumber(value) {
-    return Number(value || 0).toFixed(1);
+    const asNumber = Number(value || 0);
+    if (Number.isInteger(asNumber)) return String(asNumber);
+    return asNumber.toFixed(1);
+  }
+
+  function getCategories() {
+    return [...CATEGORIES];
   }
 
   function escapeHtml(value) {
@@ -358,6 +364,7 @@
     buildDefaultVotes,
     escapeHtml,
     getPageSession,
+    getCategories,
     loadIdentity,
     mergeVotes,
     normalizeEntries,

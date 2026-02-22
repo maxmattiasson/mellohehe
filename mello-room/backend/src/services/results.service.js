@@ -14,14 +14,9 @@ function collectBidragIds(submissions) {
   });
 }
 
-function toOneDecimal(value) {
-  return Math.round(value * 10) / 10;
-}
-
-function average(values) {
+function sum(values) {
   if (!values.length) return 0;
-  const sum = values.reduce((acc, value) => acc + value, 0);
-  return sum / values.length;
+  return values.reduce((acc, value) => acc + value, 0);
 }
 
 function buildBidragResult(bidragId, submissions) {
@@ -29,24 +24,25 @@ function buildBidragResult(bidragId, submissions) {
     (submission) => submission.votes && submission.votes[bidragId],
   );
 
-  const averages = {};
+  const categoryTotals = {};
   CATEGORIES.forEach((category) => {
     const values = participantsWithBidrag
       .map((submission) => submission.votes[bidragId]?.[category])
       .filter((value) => Number.isInteger(value));
 
-    averages[category] = toOneDecimal(average(values));
+    categoryTotals[category] = sum(values);
   });
 
-  const totalAvg = toOneDecimal(
-    CATEGORIES.reduce((sum, category) => sum + averages[category], 0),
+  const totalPoints = CATEGORIES.reduce(
+    (runningTotal, category) => runningTotal + categoryTotals[category],
+    0,
   );
 
   return {
     bidragId,
-    averages,
-    totalAvg,
-    votesCount: submissions.length,
+    categoryTotals,
+    totalPoints,
+    votesCount: participantsWithBidrag.length,
   };
 }
 
@@ -57,7 +53,7 @@ function calculateTotals(submissions) {
   );
 
   bidragResults.sort((a, b) => {
-    if (b.totalAvg !== a.totalAvg) return b.totalAvg - a.totalAvg;
+    if (b.totalPoints !== a.totalPoints) return b.totalPoints - a.totalPoints;
     const aNum = Number(a.bidragId.split('-')[1]);
     const bNum = Number(b.bidragId.split('-')[1]);
     return aNum - bNum;

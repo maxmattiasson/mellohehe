@@ -46,6 +46,7 @@
     const statusEl = document.querySelector("#saveStatus");
     const metaEl = document.querySelector("#voteMeta");
     const resultsLink = document.querySelector("#resultsLink");
+    const lobbyLink = document.querySelector("#lobbyLink");
 
     const session = getPageSession();
     if (!session) {
@@ -57,6 +58,7 @@
     const { roomCode, participantId, displayName } = session;
     metaEl.textContent = `${displayName} in room ${roomCode}`;
     resultsLink.href = `/results?code=${encodeURIComponent(roomCode)}`;
+    lobbyLink.href = `/lobby?code=${encodeURIComponent(roomCode)}`;
 
     const state = {
       roomCode,

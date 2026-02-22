@@ -10,6 +10,7 @@ const {
   upsertSubmission,
   getSubmission,
   listSubmissions,
+  listParticipants,
 } = require("../db");
 const { generateUniqueRoomCode } = require("../services/code.service");
 const { calculateTotals, CATEGORIES } = require("../services/results.service");
@@ -274,6 +275,21 @@ router.get("/:code/votes/:participantId", async (req, res) => {
 
   const submission = await getSubmission(roomCode, participantId);
   return res.json({ votes: submission?.votes || {} });
+});
+
+router.get("/:code/participants", async (req, res) => {
+  const roomCode = normalizeRoomCode(req.params.code);
+  const room = await getRoom(roomCode);
+  if (!room) return res.status(404).json({ error: "room not found" });
+
+  const participants = await listParticipants(roomCode);
+  return res.json({
+    participants: participants.map((participant) => ({
+      participantId: participant.participantId,
+      displayName: participant.displayName,
+      joinedAt: participant.joinedAt || null,
+    })),
+  });
 });
 
 router.get("/:code/totals", async (req, res) => {

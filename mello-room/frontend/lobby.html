@@ -14,14 +14,32 @@
   </head>
   <body data-page="lobby">
     <main class="shell">
-      <section class="card">
+      <header class="card page-head">
         <h1>Lobby</h1>
-        <p class="muted">
-          Use Home to create/join a room, then vote and view live totals.
-        </p>
-        <a class="btn btn-link" href="/">Go to Home</a>
+        <p id="lobbyMeta" class="muted"></p>
+        <div class="row">
+          <a id="lobbyToVote" class="btn btn-link" href="#">Back to Vote</a>
+          <a id="lobbyToResults" class="btn btn-link" href="#">Live Results</a>
+          <a class="btn btn-link" href="/">Home</a>
+        </div>
+      </header>
+
+      <section class="grid lobby-grid">
+        <article class="card lobby-panel">
+          <h2>Participants</h2>
+          <p class="muted">Everyone who has joined this room.</p>
+          <p id="lobbyStatus" class="status"></p>
+          <ul id="participantsList" class="participants-list"></ul>
+        </article>
+
+        <article class="card lobby-panel">
+          <h2 id="peekTitle">Saved Votes</h2>
+          <div id="peekContent"></div>
+        </article>
       </section>
     </main>
-    <script src="main.js"></script>
+    <script src="api.js"></script>
+    <script src="common.js"></script>
+    <script src="lobby.js"></script>
   </body>
 </html>

@@ -204,6 +204,64 @@ select:focus {
   gap: 12px;
 }
 
+.lobby-grid {
+  align-items: start;
+}
+
+.lobby-panel {
+  display: grid;
+  gap: 10px;
+}
+
+.participants-list {
+  list-style: none;
+  display: grid;
+  gap: 8px;
+}
+
+.participant-btn {
+  width: 100%;
+  text-align: left;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.8);
+  color: inherit;
+  font: inherit;
+  font-weight: 700;
+  padding: 9px 10px;
+  cursor: pointer;
+}
+
+.participant-btn:hover {
+  background: rgba(255, 255, 255, 1);
+}
+
+.participant-btn.selected {
+  border-color: #1a3049;
+  background: rgba(255, 255, 255, 0.96);
+}
+
+.table-wrap {
+  overflow-x: auto;
+}
+
+.votes-peek-table {
+  width: 100%;
+  border-collapse: collapse;
+  min-width: 440px;
+}
+
+.votes-peek-table th,
+.votes-peek-table td {
+  border-bottom: 1px solid var(--border);
+  padding: 8px 6px;
+  text-align: left;
+}
+
+.votes-peek-table td {
+  font-variant-numeric: tabular-nums;
+}
+
 .vote-card {
   display: grid;
   gap: 10px;
