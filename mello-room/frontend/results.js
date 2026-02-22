@@ -23,7 +23,7 @@
 
     const { roomCode } = session;
     const state = { bidragCount: 6, entries: buildDefaultEntries() };
-    metaEl.textContent = `Live totals for room ${roomCode}. Refresh every 3s.`;
+    metaEl.textContent = `Totala poäng i rum ${roomCode}.`;
     backLink.href = `/vote?code=${encodeURIComponent(roomCode)}`;
     lobbyLink.href = `/lobby?code=${encodeURIComponent(roomCode)}`;
 

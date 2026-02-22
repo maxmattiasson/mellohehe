@@ -300,8 +300,8 @@
         "beforeend",
         `<article class="card result-card${medalClass}">
           <h2>${escapeHtml(bidragLabel)}</h2>
-          <p><strong>Total Points:</strong> ${toDisplayNumber(result.totalPoints)}</p>
-          <p class="muted">Top category: ${escapeHtml(bestCategory.label)} (${toDisplayNumber(bestCategory.value)})</p>
+          <p><strong>Poäng:</strong> ${toDisplayNumber(result.totalPoints)}</p>
+          <p class="muted">Bästa kategori: ${escapeHtml(bestCategory.label)} (${toDisplayNumber(bestCategory.value)})</p>
           <ul class="category-list">${categoryHtml}</ul>
         </article>`,
       );
